@@ -53,7 +53,6 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSourceException;
-import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Clock;
 import com.google.android.exoplayer2.util.HandlerWrapper;
 import com.google.android.exoplayer2.util.Log;
@@ -65,6 +64,7 @@ import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -98,6 +98,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
     public @DiscontinuityReason int discontinuityReason;
     public boolean hasPlayWhenReadyChangeReason;
     public @PlayWhenReadyChangeReason int playWhenReadyChangeReason;
+    private final Set<Integer> discontinuityReasons = new HashSet<>();
 
     public PlaybackInfoUpdate(PlaybackInfo playbackInfo) {
       this.playbackInfo = playbackInfo;
@@ -114,16 +115,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
     }
 
     public void setPositionDiscontinuity(@DiscontinuityReason int discontinuityReason) {
-      if (positionDiscontinuity
-          && this.discontinuityReason != Player.DISCONTINUITY_REASON_INTERNAL) {
-        // We always prefer non-internal discontinuity reasons. We also assume that we won't report
-        // more than one non-internal discontinuity per message iteration.
-        Assertions.checkArgument(discontinuityReason == Player.DISCONTINUITY_REASON_INTERNAL);
-        return;
-      }
       hasPendingChange = true;
       positionDiscontinuity = true;
-      this.discontinuityReason = discontinuityReason;
+      // Allow multiple non-internal discontinuity reasons
+      if (!discontinuityReasons.contains(discontinuityReason)) {
+          discontinuityReasons.add(discontinuityReason);
+          // Prefer non-internal reasons if present
+          if (this.discontinuityReason != Player.DISCONTINUITY_REASON_INTERNAL || discontinuityReason == Player.DISCONTINUITY_REASON_INTERNAL) {
+              this.discontinuityReason = discontinuityReason;
+          }
+      }
     }
 
     public void setPlayWhenReadyChangeReason(
