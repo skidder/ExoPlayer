@@ -154,6 +154,8 @@ import com.google.android.exoplayer2.testutil.FakeTrackSelector;
 import com.google.android.exoplayer2.testutil.FakeVideoRenderer;
 import com.google.android.exoplayer2.testutil.TestExoPlayerBuilder;
 import com.google.android.exoplayer2.text.TextOutput;
+import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
 import com.google.android.exoplayer2.upstream.Allocation;
 import com.google.android.exoplayer2.upstream.Allocator;
 import com.google.android.exoplayer2.upstream.Loader;
@@ -12970,6 +12972,38 @@ public final class ExoPlayerTest {
     verify(listener).onAvailableCommandsChanged(any());
     verifyNoMoreInteractions(listener);
     player.release();
+  }
+
+  @SuppressWarnings("deprecation") // Testing deprecated listener call.
+  @Test
+  public void rendererError_whileReadingAhead_multipleNonInternalEvents() throws Exception {
+    // Creating a PlaybackInfo instance with dummy/placeholder values
+    Timeline dummyTimeline = Timeline.EMPTY;
+    MediaPeriodId dummyMediaPeriodId = new MediaPeriodId(new Object());
+    long dummyStartPosition = 0L;
+    long dummyContentPosition = 0L;
+    int dummyPlaybackState = 0;
+    ExoPlaybackException dummyExoPlaybackException = null;
+    boolean dummyPlayWhenReady = false;
+    TrackGroupArray dummyTrackGroups = TrackGroupArray.EMPTY;
+    TrackSelectorResult dummyTrackSelectorResult = new TrackSelectorResult(new RendererConfiguration[]{}, new ExoTrackSelection[]{}, new int[]{});
+    List<Metadata> dummyMetadataList = Collections.emptyList();
+    boolean dummyIsLoading = false;
+    int dummyOffloadSchedulingDelayMs = 0;
+    PlaybackParameters dummyPlaybackParameters = PlaybackParameters.DEFAULT;
+    long dummyTotalBufferedDuration = 0L;
+    long dummyPositionUs = 0L;
+    long dummyBufferedPositionUs = 0L;
+    long dummyActions = 0L;
+    boolean dummyIsPlaying = false;
+
+    PlaybackInfo mockPlaybackInfo = new PlaybackInfo(dummyTimeline, dummyMediaPeriodId, dummyStartPosition, dummyContentPosition, dummyPlaybackState, dummyExoPlaybackException, dummyPlayWhenReady, dummyTrackGroups, dummyTrackSelectorResult, dummyMetadataList, dummyMediaPeriodId, dummyIsLoading, dummyOffloadSchedulingDelayMs, dummyPlaybackParameters, dummyTotalBufferedDuration, dummyPositionUs, dummyBufferedPositionUs, dummyActions, dummyIsPlaying);
+    ExoPlayerImplInternal.PlaybackInfoUpdate playbackInfoUpdate = new ExoPlayerImplInternal.PlaybackInfoUpdate(mockPlaybackInfo);
+
+    // rapidly set position discontinuity
+    playbackInfoUpdate.setPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK);
+    playbackInfoUpdate.setPositionDiscontinuity(Player.DISCONTINUITY_REASON_INTERNAL);
+    playbackInfoUpdate.setPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK);
   }
 
   @SuppressWarnings("deprecation") // Testing deprecated listener call.
