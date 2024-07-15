@@ -34,13 +34,14 @@ android {
 }
 
 dependencies {
-    api project(modulePrefix + 'library-common')
-    api project(modulePrefix + 'library-container')
-    // TODO(b/203754886): Revisit which modules are exported as API dependencies.
-    api project(modulePrefix + 'library-datasource')
-    api project(modulePrefix + 'library-decoder')
-    api project(modulePrefix + 'library-extractor')
-    api project(modulePrefix + 'library-database')
+    def exoPlayerVersion = project.findProperty('VERSION_CODE_EXO_PLAYER') ?: '2.19.1'
+
+    api "com.google.android.exoplayer:exoplayer-common:$exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-container:$exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-datasource:$exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-decoder:$exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-extractor:$exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-database:$exoPlayerVersion"
     implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
     implementation 'androidx.core:core:' + androidxCoreVersion
     compileOnly 'com.google.code.findbugs:jsr305:' + jsr305Version
@@ -51,15 +52,15 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:' + androidxTestRunnerVersion
     androidTestImplementation 'com.linkedin.dexmaker:dexmaker:' + dexmakerVersion
     androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:' + dexmakerVersion
-    androidTestImplementation(project(modulePrefix + 'testutils')) {
-        exclude module: modulePrefix.substring(1) + 'library-core'
+    androidTestImplementation("com.google.android.exoplayer:exoplayer-testutils:$exoPlayerVersion") {
+        exclude module: 'exoplayer-core'
     }
     androidTestImplementation 'com.squareup.okhttp3:mockwebserver:' + okhttpVersion
     testCompileOnly 'org.checkerframework:checker-compat-qual:' + checkerframeworkCompatVersion
     testImplementation 'com.squareup.okhttp3:mockwebserver:' + okhttpVersion
     testImplementation 'org.robolectric:robolectric:' + robolectricVersion
-    testImplementation project(modulePrefix + 'testutils')
-    testImplementation project(modulePrefix + 'robolectricutils')
+    testImplementation "com.google.android.exoplayer:exoplayer-testutils:$exoPlayerVersion"
+    testImplementation "com.google.android.exoplayer:exoplayer-robolectricutils:$exoPlayerVersion"
 }
 
 ext {
